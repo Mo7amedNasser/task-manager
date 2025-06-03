@@ -1,14 +1,22 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
 import { connectDB } from "./config/db.js";
 
-const authRoutes = require("./routes/auth.route.js");
+import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 dotenv.config();
 
-// Middleware to handle CORS
+// Ensure uploads directory exists
+const uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Enable CORS Middleware
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "*",

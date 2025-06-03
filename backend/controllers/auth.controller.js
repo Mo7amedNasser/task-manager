@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 // Generate JWT token
@@ -16,12 +16,21 @@ const generateToken = (userId) => {
  */
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar = null, adminInviteToken } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Determine user role based on invite token (admin or member)
+    let role = "member";
+    if (
+      adminInviteToken &&
+      adminInviteToken === process.env.ADMIN_INVITE_TOKEN
+    ) {
+      role = "admin";
     }
 
     // Hash password
@@ -32,16 +41,17 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role,
+      avatar,
     });
-
-    // Generate token
-    const token = generateToken(user._id);
 
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token,
+      role: user.role,
+      avatar: user.avatar,
+      token: generateToken(user._id),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -69,14 +79,14 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate token
-    const token = generateToken(user._id);
-
+    // Return user profile
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token,
+      role: user.role,
+      avatar: user.avatar,
+      token: generateToken(user._id),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -126,6 +136,8 @@ export const updateProfile = async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
+      role: updatedUser.role,
+      token: generateToken(updatedUser._id),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
