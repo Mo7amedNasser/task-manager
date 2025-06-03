@@ -20,12 +20,24 @@ const taskSchema = new mongoose.Schema(
       default: "Pending",
     },
     dueDate: { type: Date, required: true },
+    assignedTo: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     todoChecklist: [todoSchema],
+    attachments: [
+      {
+        fileName: String,
+        url: String,
+      },
+    ],
     progress: {
       type: Number,
       min: 0,

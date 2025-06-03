@@ -6,6 +6,8 @@ import path from "path";
 import { connectDB } from "./config/db.js";
 
 import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import taskRoutes from "./routes/task.route.js";
 
 const app = express();
 dotenv.config();
@@ -33,8 +35,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-// app.use("/api/users", userRoutes);
-// app.use("/api/tasks", taskRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 7000;
